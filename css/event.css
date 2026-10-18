@@ -1,0 +1,123 @@
+/* =========================================================
+   EVENT PAGE — mewarisi token warna & font dari style.css.
+   ========================================================= */
+
+.section-eyebrow{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:14px;
+}
+.section-eyebrow-light{ color:var(--blue-pale); }
+
+/* ================= PAGE BANNER ================= */
+.ev-banner{
+    position:relative;
+    min-height:42vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:140px 6% 70px;
+    background: linear-gradient(135deg,#020b5c,#040f8f);
+    overflow:hidden;
+    isolation:isolate;
+}
+.ev-banner-glow{
+    position:absolute;
+    inset:-20% -10% auto -10%;
+    height:70%;
+    background:radial-gradient(closest-side, rgba(91,63,245,0.35), transparent 70%);
+    z-index:-1;
+}
+.ev-banner-content{ max-width:680px; color:#fff; }
+.ev-banner-content h1{
+    font-size:clamp(32px, 6vw, 52px);
+    font-weight:700;
+    line-height:1.2;
+    margin-bottom:16px;
+}
+.ev-banner-content p{
+    font-size:16px;
+    line-height:1.7;
+    color:rgba(255,255,255,0.75);
+    max-width:520px;
+    margin:0 auto;
+}
+
+/* ================= JENIS EVENT ================= */
+.ev-section{
+    padding:90px 6% 60px;
+    background:#f5f7fb;
+}
+.ev-grid{
+    max-width:1000px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:24px;
+}
+.ev-card{
+    background:#ffffff;
+    border-radius:20px;
+    padding:26px 24px;
+    box-shadow:0 10px 25px rgba(11,10,46,0.07);
+}
+.ev-card-icon{
+    width:48px;
+    height:48px;
+    border-radius:14px;
+    background:var(--blue-pale);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    margin-bottom:14px;
+}
+.ev-card h3{
+    font-size:17px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:8px;
+}
+.ev-card p{
+    font-size:13.5px;
+    line-height:1.7;
+    color:rgba(23,21,51,0.65);
+}
+
+/* ================= CTA LIHAT JADWAL ================= */
+.ev-cta{
+    max-width:1000px;
+    margin:40px auto 0;
+    text-align:center;
+}
+.ev-cta a{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:13px 28px;
+    border-radius:50px;
+    background:var(--blue);
+    color:#fff;
+    font-size:14px;
+    font-weight:700;
+    text-decoration:none;
+    transition:transform 0.2s ease, background 0.2s ease;
+}
+.ev-cta a:hover{
+    transform:translateY(-2px);
+    background:var(--navy);
+}
+
+.ev-note{
+    max-width:1000px;
+    margin:20px auto 0;
+    font-size:13px;
+    color:rgba(23,21,51,0.5);
+    text-align:center;
+}

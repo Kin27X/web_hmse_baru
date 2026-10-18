@@ -1,0 +1,377 @@
+/* =====================================================
+   Ini adalah style untuk hero section (landing pagenya) yang diagonal di halaman depan.
+   ===================================================== */
+
+   .home-hero{
+    --hh-nav: 104px;          /* tinggi navbar fixed */
+    /* diagonal dipakai bersama navbar (rumusnya ada di :root style.css) */
+    /* nilai cadangan (setelah koma) = hero tetap tampil walau style.css belum terpasang */
+    --hh-slope: calc(var(--tilt, 0.2867) * var(--stage-h, max(100vh, 620px)));
+    --hh-navy-left: var(--navy-bottom-x, 53.5vw);     /* x kaki bawah diagonal navy */
+    --hh-band: var(--band-w, 4vw);                    /* lebar pita abu */
+
+    position:relative;
+    width:100%;
+    height:100vh;
+    height:100svh;            /* pas layar, tidak terpengaruh address bar HP */
+    min-height:620px;
+    padding-top:var(--hh-nav);
+    display:flex;
+    align-items:center;
+    background:#f5f7fb;
+    overflow:hidden;
+    isolation:isolate;
+}
+
+/* ---------- grid tipis di latar kiri ---------- */
+.hh-grid-bg{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    background-image:
+        linear-gradient(rgba(45,31,214,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45,31,214,.07) 1px, transparent 1px);
+    background-size:48px 48px;
+    background-position:center top;
+    -webkit-mask-image:linear-gradient(100deg, #000 0%, #000 30%, transparent 62%);
+            mask-image:linear-gradient(100deg, #000 0%, #000 30%, transparent 62%);
+}
+
+/* ---------- teks ---------- */
+.hh-text{
+    position:relative;
+    z-index:3;
+    padding-left:8%;
+    max-width:52%;
+}
+
+.hh-badge{
+    display:inline-block;
+    font-family:ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size:clamp(11px, .85vw, 13px);
+    font-weight:600;
+    letter-spacing:.2px;
+    color:var(--blue);
+    background:rgba(45,31,214,.08);
+    border:1px solid rgba(45,31,214,.18);
+    padding:7px 14px;
+    border-radius:8px;
+    margin-bottom:22px;
+}
+
+.home-hero h1{
+    font-size:clamp(34px, 4.4vw, 72px);
+    font-weight:800;
+    line-height:1.12;
+    letter-spacing:-.5px;
+    color:var(--navy);
+}
+
+.hh-grad{
+    background-image:linear-gradient(90deg, var(--blue) 0%, var(--blue-pale) 100%);
+    -webkit-background-clip:text;
+            background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+}
+
+.hh-tagline{
+    margin-top:18px;
+    font-family:ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size:clamp(13px, 1.2vw, 18px);
+    color:var(--ink);
+    opacity:.85;
+    line-height:1.6;
+}
+
+.hh-caret{
+    display:inline-block;
+    width:.55em;
+    height:1.1em;
+    margin-left:5px;
+    vertical-align:-.2em;
+    background:var(--blue);
+    animation:hhBlink 1s steps(2, start) infinite;
+}
+@keyframes hhBlink{
+    to{ visibility:hidden; }
+}
+
+/* ---------- tombol CTA ---------- */
+.hh-cta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-top:34px;
+}
+
+.hh-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 28px;
+    border-radius:50px;
+    border:2px solid var(--navy);
+    font-weight:600;
+    font-size:15px;
+    text-decoration:none;
+    transition:transform .25s ease, background .25s ease, color .25s ease, box-shadow .25s ease, border-color .25s ease;
+    -webkit-tap-highlight-color:transparent;
+}
+.hh-btn svg{
+    transition:transform .25s ease;
+}
+
+.hh-btn-primary{
+    background:var(--navy);
+    color:#fff;
+}
+.hh-btn-ghost{
+    background:transparent;
+    color:var(--navy);
+}
+
+@media (hover:hover) and (pointer:fine){
+    .hh-btn:hover{
+        transform:translateY(-2px);
+    }
+    .hh-btn-primary:hover{
+        background:var(--blue);
+        border-color:var(--blue);
+        box-shadow:0 10px 24px rgba(45,31,214,.30);
+    }
+    .hh-btn-primary:hover svg{
+        transform:translateX(4px);
+    }
+    .hh-btn-ghost:hover{
+        background:var(--navy);
+        color:#fff;
+    }
+}
+.hh-btn:active{
+    transform:translateY(0) scale(.98);
+}
+
+/* ---------- panggung kanan (diagonal, meniru navbar) ----------
+   Urutan lapisan sama seperti navbar:
+   putih -> (haze) -> pita abu #c7c9d6 -> biru-navy bermotif.
+   Titik temu di bawah navbar diselaraskan dgn stripe navbar (62% / 66%). */
+.hh-stage{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;            /* hanya .hh-stage-main yg menerima kursor */
+}
+
+/* haze lebar: putih perlahan jadi abu, tanpa tepi keras */
+.hh-stage-fade{
+    position:absolute;
+    top:0; bottom:0; right:0;
+    left:30vw;
+    background:linear-gradient(90deg, rgba(199,201,214,0) 0%, rgba(199,201,214,.55) 100%);
+    clip-path:polygon(var(--hh-slope) 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* pita abu: warna & karakter sama dgn .nav-bg-gray */
+.hh-stage-soft{
+    position:absolute;
+    top:0; bottom:0; right:0;
+    left:calc(var(--hh-navy-left) - var(--hh-band));
+    background:var(--nav-gray);
+    clip-path:polygon(var(--hh-slope) 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* panel biru-navy: foto motif + overlay yang SAMA dgn .navbar::after */
+.hh-stage-main{
+    position:absolute;
+    top:0; bottom:0; right:0;
+    left:var(--hh-navy-left);
+    pointer-events:auto;
+    touch-action:pan-y;
+    background:
+        radial-gradient(circle at 70% 45%, rgba(91,63,245,.30), transparent 55%),
+        linear-gradient(135deg, rgba(11,10,46,.55), rgba(11,10,46,.75)),
+        url(../images/motif_biru.jpg) center/cover no-repeat,
+        #0d0c33;
+    clip-path:polygon(var(--hh-slope) 0, 100% 0, 100% 100%, 0 100%);
+    overflow:hidden;
+}
+
+/* grid CSS = cadangan kalau JS mati; saat JS jalan digantikan canvas */
+.hh-stage-grid{
+    position:absolute;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(143,123,255,.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(143,123,255,.16) 1px, transparent 1px);
+    background-size:44px 44px;
+}
+.hh-stage-main.is-live .hh-stage-grid{
+    display:none;
+}
+
+#hhCanvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    cursor:crosshair;
+}
+
+.hh-hint{
+    position:absolute;
+    right:5%;
+    bottom:26px;
+    font-family:ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size:12px;
+    letter-spacing:.2px;
+    color:rgba(191,176,255,.72);
+    pointer-events:none;
+    user-select:none;
+}
+.hh-hint-touch{ display:none; }
+
+/* bilah jendela ala terminal: hanya dipakai pada kartu mobile */
+.hh-window{ display:none; }
+@media (hover:none){
+    .hh-hint-pc{ display:none; }
+    .hh-hint-touch{ display:inline; }
+}
+
+/* ---------- indikator gulir ---------- */
+.hh-scroll{
+    position:absolute;
+    left:8%;
+    bottom:28px;
+    z-index:3;
+    width:24px;
+    height:38px;
+    border:2px solid var(--navy);
+    border-radius:14px;
+    opacity:.7;
+    transition:opacity .25s ease;
+    -webkit-tap-highlight-color:transparent;
+}
+.hh-scroll:hover{ opacity:1; }
+.hh-scroll-dot{
+    position:absolute;
+    top:7px; left:50%;
+    width:4px; height:8px;
+    margin-left:-2px;
+    border-radius:3px;
+    background:var(--navy);
+    animation:hhScroll 1.8s ease-in-out infinite;
+}
+@keyframes hhScroll{
+    0%   { transform:translateY(0);    opacity:1; }
+    70%  { transform:translateY(12px); opacity:0; }
+    100% { transform:translateY(0);    opacity:0; }
+}
+
+/* anchor #kegiatan tidak ketutup navbar fixed */
+#kegiatan{
+    scroll-margin-top:90px;
+}
+
+/* ---------- layar pendek (laptop 768px dsb.) ---------- */
+@media (max-height:760px) and (min-width:901px){
+    .home-hero{ --hh-nav: 96px; }
+    .hh-badge{ margin-bottom:14px; }
+    .hh-cta{ margin-top:24px; }
+}
+
+/* ---------- tablet & HP: teks di atas, panggung di bawah ---------- */
+@media (max-width:900px){
+    /* teks di atas, kartu interaksi mengisi sisa tinggi layar */
+    .home-hero{
+        --hh-nav: 84px;
+        --hh-slope: 0px;
+        flex-direction:column;
+        align-items:stretch;
+        min-height:640px;
+    }
+
+    .hh-grid-bg{
+        -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 45%, transparent 75%);
+                mask-image:linear-gradient(180deg, #000 0%, #000 45%, transparent 75%);
+    }
+
+    .hh-text{
+        padding:30px 7% 0;
+        max-width:100%;
+        flex:0 0 auto;
+    }
+    .hh-badge{ margin-bottom:16px; }
+    .home-hero h1{ font-size:clamp(32px, 9vw, 52px); }
+    .hh-cta{ margin-top:22px; }
+
+    /* kartu: bingkai = abu gradasi, isi = navy bermotif + grid */
+    .hh-stage{
+        position:relative;
+        inset:auto;
+        flex:1 1 0;
+        min-height:220px;
+        margin:26px 6% 7%;
+        padding:6px;
+        border-radius:24px;
+        background:linear-gradient(135deg, #f4f5fb 0%, #c7c9d6 55%, #9fa3bd 100%);
+        box-shadow:0 14px 34px rgba(11,10,46,.18);
+    }
+    .hh-stage-fade,
+    .hh-stage-soft{ display:none; }
+
+    .hh-stage-main{
+        top:6px; right:6px; bottom:6px; left:6px;
+        clip-path:none;
+        border-radius:18px;
+    }
+
+    .hh-window{
+        position:absolute;
+        top:0; left:0; right:0;
+        z-index:2;
+        height:34px;
+        display:flex;
+        align-items:center;
+        gap:7px;
+        padding:0 14px;
+        background:linear-gradient(180deg, rgba(5,4,15,.55), rgba(5,4,15,.25));
+        border-bottom:1px solid rgba(143,123,255,.18);
+        pointer-events:none;
+    }
+    .hh-wd{
+        width:10px;
+        height:10px;
+        border-radius:50%;
+        background:#ff5f57;
+    }
+    .hh-wd:nth-child(2){ background:#febc2e; }
+    .hh-wd:nth-child(3){ background:#28c840; }
+    .hh-window-title{
+        margin-left:8px;
+        font-family:ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, "Courier New", monospace;
+        font-size:12px;
+        color:rgba(191,176,255,.8);
+    }
+
+    .hh-hint{
+        right:50%;
+        transform:translateX(50%);
+        bottom:12px;
+        white-space:nowrap;
+    }
+
+    .hh-scroll{ display:none; }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .hh-caret,
+    .hh-scroll-dot{
+        animation:none;
+    }
+    .hh-btn,
+    .hh-btn svg{
+        transition:none;
+    }
+}

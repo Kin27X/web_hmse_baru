@@ -1,0 +1,245 @@
+/* =========================================================
+   GALLERY PAGE — mewarisi token warna & font dari style.css.
+   File ini berdiri sendiri.
+   ========================================================= */
+.section-eyebrow{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:14px;
+}
+.section-eyebrow-light{ color:var(--blue-pale); }
+
+/* ================= PAGE BANNER ================= */
+.gl-banner{
+    position:relative;
+    min-height:42vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:140px 6% 70px;
+    background: linear-gradient(135deg,#020b5c,#040f8f);
+    overflow:hidden;
+    isolation:isolate;
+}
+.gl-banner-glow{
+    position:absolute;
+    inset:-20% -10% auto -10%;
+    height:70%;
+    background:radial-gradient(closest-side, rgba(91,63,245,0.35), transparent 70%);
+    z-index:-1;
+}
+.gl-banner-content{ max-width:680px; color:#fff; }
+.gl-banner-content h1{
+    font-size:clamp(32px, 6vw, 52px);
+    font-weight:700;
+    line-height:1.2;
+    margin-bottom:16px;
+}
+.gl-banner-content p{
+    font-size:16px;
+    line-height:1.7;
+    color:rgba(255,255,255,0.75);
+    max-width:520px;
+    margin:0 auto;
+}
+
+.gl-section{
+    padding:80px 6% 90px;
+    background:#f5f7fb;
+}
+
+/* ================= FILTER TABS ================= */
+.gl-filter{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:56px;
+}
+.gl-filter-btn{
+    padding:11px 22px;
+    border:none;
+    border-radius:50px;
+    background:#ffffff;
+    color:var(--ink);
+    font-family:'Montserrat', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    box-shadow:0 8px 18px rgba(11,10,46,0.08);
+    transition:background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+.gl-filter-btn:hover{
+    box-shadow:0 10px 22px rgba(45,31,214,0.15);
+}
+.gl-filter-btn.active{
+    background:var(--blue);
+    color:#fff;
+    box-shadow:0 10px 22px rgba(45,31,214,0.25);
+}
+
+/* ================= GRID FOTO (flat, tanpa album) ================= */
+.gl-grid{
+    max-width:1100px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+    gap:20px;
+}
+.gl-photo{
+    position:relative;
+    aspect-ratio:4/3;
+    border-radius:16px;
+    overflow:hidden;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(11,10,46,0.08);
+}
+.gl-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform 0.4s ease;
+}
+.gl-photo:hover img{
+    transform:scale(1.06);
+}
+.gl-photo::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, rgba(11,10,46,0.35), transparent 55%);
+    opacity:0;
+    transition:opacity 0.3s ease;
+}
+.gl-photo:hover::after{
+    opacity:1;
+}
+.gl-photo-category{
+    position:absolute;
+    left:10px;
+    bottom:10px;
+    z-index:1;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    background:rgba(11,10,46,0.55);
+    padding:4px 12px;
+    border-radius:50px;
+    opacity:0;
+    transition:opacity 0.3s ease;
+}
+.gl-photo:hover .gl-photo-category{
+    opacity:1;
+}
+
+.gl-note{
+    max-width:1000px;
+    margin:40px auto 0;
+    font-size:13px;
+    color:rgba(23,21,51,0.5);
+    text-align:center;
+}
+
+/* ================= LIGHTBOX ================= */
+.gl-lightbox{
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+.gl-lightbox.active{ opacity:1; visibility:visible; }
+.gl-lightbox-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(5,8,15,0.92);
+}
+.gl-lightbox-body{
+    position:relative;
+    max-width:min(88vw, 760px);
+    max-height:82vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.gl-lightbox-body img{
+    max-width:100%;
+    max-height:70vh;
+    border-radius:16px;
+    box-shadow:0 30px 60px rgba(0,0,0,0.5);
+    transform:scale(0.96);
+    transition:transform 0.3s ease;
+}
+.gl-lightbox.active .gl-lightbox-body img{ transform:scale(1); }
+.gl-lightbox-caption{
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#fff;
+    text-align:center;
+}
+.gl-lightbox-caption #glLightboxAlbum{
+    font-size:15px;
+    font-weight:700;
+}
+.gl-lightbox-caption #glLightboxCount{
+    font-size:12.5px;
+    color:rgba(255,255,255,0.55);
+}
+.gl-lightbox-close{
+    position:absolute;
+    top:20px;
+    right:24px;
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:22px;
+    line-height:1;
+    cursor:pointer;
+    transition:background 0.2s ease;
+}
+.gl-lightbox-close:hover{ background:rgba(255,255,255,0.22); }
+.gl-lightbox-nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    width:46px;
+    height:46px;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    color:#fff;
+    font-size:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:background 0.2s ease;
+}
+.gl-lightbox-nav:hover{ background:rgba(255,255,255,0.22); }
+.gl-lightbox-prev{ left:18px; }
+.gl-lightbox-next{ right:18px; }
+
+@media(max-width:640px){
+    .gl-lightbox-nav{ width:38px; height:38px; font-size:18px; }
+    .gl-lightbox-prev{ left:8px; }
+    .gl-lightbox-next{ right:8px; }
+    .gl-lightbox-close{ top:12px; right:12px; }
+}
+
+@media(prefers-reduced-motion: reduce){
+    .gl-lightbox, .gl-lightbox-body img, .gl-photo img{ transition:none; }
+}

@@ -1,0 +1,260 @@
+/* =========================================================
+   PROGRAM KERJA PAGE — mewarisi token warna & font dari
+   style.css (:root --navy/--ink/--blue/--blue-light/--blue-pale)
+   File ini berdiri sendiri, tidak bergantung ke CSS halaman lain.
+   ========================================================= */
+
+   .section-eyebrow{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:14px;
+}
+.section-eyebrow-light{
+    color:var(--blue-pale);
+}
+
+/* ================= PAGE BANNER ================= */
+.pk-banner{
+    position:relative;
+    min-height:42vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:140px 6% 70px;
+    background: linear-gradient(135deg,#020b5c,#040f8f);
+    overflow:hidden;
+    isolation:isolate;
+}
+.pk-banner-glow{
+    position:absolute;
+    inset:-20% -10% auto -10%;
+    height:70%;
+    background:radial-gradient(closest-side, rgba(91,63,245,0.35), transparent 70%);
+    z-index:-1;
+}
+.pk-banner-content{
+    max-width:680px;
+    color:#fff;
+}
+.pk-banner-content h1{
+    font-size:clamp(32px, 6vw, 52px);
+    font-weight:700;
+    line-height:1.2;
+    margin-bottom:16px;
+}
+.pk-banner-content p{
+    font-size:16px;
+    line-height:1.7;
+    color:rgba(255,255,255,0.75);
+    max-width:520px;
+    margin:0 auto;
+}
+
+/* ================= SECTION WRAP ================= */
+.proker-section{
+    padding:100px 6% 90px;
+    background:#f5f7fb;
+}
+.proker-head{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+/* ================= DROPDOWN PERIODE ================= */
+.periode-select{
+    position:relative;
+    display:inline-block;
+    /* Catatan: dulu ada z-index:50 di sini buat "menang" lawan stacking
+       context kartu proker di bawahnya. Sekarang tidak perlu lagi --
+       dropdown-nya (.periode-list) sudah dipindah jadi anak <body>
+       lewat JS (teknik portal) dan position:fixed, jadi otomatis lepas
+       dari masalah stacking-context section manapun. */
+}
+.periode-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:2px;
+    padding:12px 12px 12px 26px;
+    border:none;
+    border-radius:50px;
+    background:#ffffff;
+    color:var(--ink);
+    font-family:'Montserrat', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    box-shadow:0 10px 25px rgba(11,10,46,0.12);
+    transition:box-shadow 0.3s ease;
+    -webkit-tap-highlight-color:transparent;
+}
+.periode-btn:hover,
+.periode-select.active .periode-btn{
+    box-shadow:0 14px 30px rgba(45,31,214,0.2);
+}
+.periode-btn .material-icons{
+    transition:transform 0.3s ease;
+}
+.periode-select.active .periode-btn .material-icons{
+    transform:rotate(180deg);
+}
+
+.periode-list{
+    position:fixed; 
+    min-width:230px;
+    list-style:none;
+    background:#ffffff;
+    border-radius:16px;
+    padding:8px 0;
+    box-shadow:0 20px 45px rgba(11,10,46,0.18);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-8px);
+    transition:opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+    z-index:2000; /* jauh di atas apapun di halaman (navbar cuma 1000/1150) */
+}
+.periode-list.active{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+}
+.periode-list li{
+    padding:11px 22px;
+    text-align:left;
+    font-size:14.5px;
+    color:var(--ink);
+    cursor:pointer;
+    transition:background 0.2s ease;
+}
+.periode-list li:hover{
+    background:#f5f7fb;
+}
+.periode-list li.active{
+    color:var(--blue);
+    font-weight:700;
+}
+
+/* ================= TIMELINE ================= */
+.timeline-wrap{
+    max-width:820px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:1fr 90px;
+    gap:32px;
+    align-items:stretch;
+}
+.timeline-programs{
+    grid-column:1;
+}
+.proker-group{
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+}
+.proker-group[hidden]{
+    display:none; /* tanpa baris ini, display:flex di atas menang atas
+                     atribut hidden bawaan browser -- akibatnya SEMUA
+                     periode kelihatan bareng, bukan cuma yang aktif */
+}
+.proker-card{
+    background:#ffffff;
+    border-radius:22px;
+    padding:28px 30px;
+    box-shadow:
+      0 10px 25px rgba(0,0,0,0.06),
+      0 0 15px rgba(45,31,214,0.06);
+    transition:transform 0.35s ease, box-shadow 0.35s ease;
+}
+.proker-card:hover{
+    transform:translateY(-5px);
+    box-shadow:
+      0 18px 35px rgba(0,0,0,0.10),
+      0 0 20px rgba(45,31,214,0.14);
+}
+.proker-card h3{
+    font-size:19px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:10px;
+}
+.proker-card p{
+    font-size:14.5px;
+    line-height:1.7;
+    color:rgba(23,21,51,0.75);
+}
+.proker-card em{
+    font-style:italic;
+    opacity:0.6;
+}
+.proker-card-empty{
+    text-align:center;
+    color:rgba(23,21,51,0.5);
+}
+
+/* Rail: garis + 2 titik (awal & akhir periode), tinggi otomatis
+   mengikuti tinggi kolom kartu di sebelahnya (grid align-items:stretch),
+   jadi berapa pun jumlah program-nya, garis+bulatan tidak pernah
+   "kelebihan" atau "kekurangan" -- selalu membungkus persis. */
+.timeline-rail{
+    grid-column:2;
+    position:relative;
+}
+.rail-line{
+    position:absolute;
+    left:50%;
+    top:17px;
+    bottom:17px;
+    border-left:3px dashed var(--blue-pale);
+    transform:translateX(-50%);
+}
+.rail-dot{
+    position:absolute;
+    left:50%;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:var(--blue);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10.5px;
+    font-weight:700;
+    box-shadow:0 0 0 6px rgba(45,31,214,0.12);
+    z-index:1;
+}
+.rail-dot-top{
+    top:0;
+    transform:translate(-50%,0);
+}
+.rail-dot-bottom{
+    bottom:0;
+    transform:translate(-50%,0);
+}
+
+.proker-note{
+    max-width:820px;
+    margin:34px auto 0;
+    font-size:13px;
+    color:rgba(23,21,51,0.5);
+    text-align:center;
+}
+
+@media(max-width:700px){
+    .timeline-wrap{
+        grid-template-columns:1fr 56px;
+        gap:16px;
+    }
+    .proker-card{
+        padding:22px 20px;
+    }
+    .rail-dot{
+        width:28px;
+        height:28px;
+        font-size:9px;
+    }
+}

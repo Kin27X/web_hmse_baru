@@ -1,0 +1,441 @@
+/* =========================================================
+   STRUKTUR ORGANISASI PAGE — mewarisi token warna & font dari
+   style.css. File ini berdiri sendiri.
+   ========================================================= */
+
+.section-eyebrow{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:14px;
+}
+.section-eyebrow-light{ color:var(--blue-pale); }
+
+/* ================= PAGE BANNER ================= */
+.st-banner{
+    position:relative;
+    min-height:42vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:140px 6% 70px;
+    background: linear-gradient(135deg,#020b5c,#040f8f);
+    overflow:hidden;
+    isolation:isolate;
+}
+.st-banner-glow{
+    position:absolute;
+    inset:-20% -10% auto -10%;
+    height:70%;
+    background:radial-gradient(closest-side, rgba(91,63,245,0.35), transparent 70%);
+    z-index:-1;
+}
+.st-banner-content{ max-width:680px; color:#fff; }
+.st-banner-content h1{
+    font-size:clamp(32px, 6vw, 52px);
+    font-weight:700;
+    line-height:1.2;
+    margin-bottom:16px;
+}
+.st-banner-content p{
+    font-size:16px;
+    line-height:1.7;
+    color:rgba(255,255,255,0.75);
+    max-width:520px;
+    margin:0 auto;
+}
+
+.st-section{
+    padding:100px 6% 120px;
+    background:#f5f7fb;
+}
+
+/* ================= KARTU NODE (dipakai di tree & jadi basis popover) ================= */
+.org-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    background:#ffffff;
+    border:none;
+    border-radius:16px;
+    padding:16px 22px;
+    min-width:210px;
+    max-width:230px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(11,10,46,0.08);
+    cursor:pointer;
+    font-family:'Montserrat', sans-serif;
+    transition:transform 0.25s ease, box-shadow 0.25s ease;
+    -webkit-tap-highlight-color:transparent;
+}
+.org-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 16px 30px rgba(45,31,214,0.16);
+}
+.org-role{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1.4px;
+    text-transform:uppercase;
+    color:var(--blue);
+}
+.org-name{
+    font-size:14.5px;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.35;
+}
+.org-card-staff{
+    padding:12px 20px;
+    min-width:190px;
+}
+.org-card-staff .org-name{
+    font-size:13.5px;
+    font-weight:600;
+}
+
+/* ================= DESKTOP TREE ================= */
+.org-desktop{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+.org-trunk-single{
+    width:2px;
+    height:28px;
+    background:var(--blue-pale);
+}
+
+/* Kontainer baris kolom (cabang ATAU divisi) -- generik, bisa isi
+   berapa pun kolom, otomatis wrap ke baris baru kalau kepanjangan.
+   Garis penghubung horizontal (.org-connector-bar) dihitung & disisipkan
+   oleh JS saat render (bisa lebih dari satu, satu per baris visual),
+   supaya tetap presisi walau adminnya nambah cabang/divisi baru. */
+.org-row{
+    position:relative;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:30px 40px;
+    padding-top:26px;
+    width:100%;
+}
+.org-col{
+    position:relative;
+    width:210px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+}
+.org-col .org-card{
+    width:210px;
+    min-width:0;
+    max-width:none;
+}
+.org-col::before{ /* tangkai dari garis horizontal turun ke kartu kepala */
+    content:"";
+    position:absolute;
+    top:-26px;
+    left:50%;
+    width:2px;
+    height:26px;
+    background:var(--blue-pale);
+    transform:translateX(-50%);
+}
+.org-connector-bar{
+    position:absolute;
+    height:2px;
+    background:var(--blue-pale);
+}
+
+/* trunk lebar antara baris Sekretaris/Bendahara -> baris divisi */
+.org-trunk-wide{
+    height:34px;
+}
+
+.org-icon{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:var(--blue-pale);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:6px;
+    font-size:17px;
+}
+.org-icon .material-icons{ font-size:17px; }
+
+/* ================= POPOVER (HOVER, DESKTOP) — foto besar kiri, detail kanan ================= */
+.org-popover{
+    position:fixed;
+    z-index:800;
+    width:360px;
+    display:flex;
+    gap:18px;
+    background:#ffffff;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 24px 50px rgba(11,10,46,0.22);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(6px);
+    transition:opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    pointer-events:none;
+}
+.org-popover.active{
+    opacity:1;
+    visibility:visible;
+    transform:translateY(0);
+    pointer-events:auto;
+}
+
+/* Foto besar rounded-rect di kiri (bukan lingkaran kecil) */
+.org-popover-avatar{
+    width:104px;
+    height:132px;
+    flex-shrink:0;
+    border-radius:20px;
+    overflow:hidden;
+    background:linear-gradient(160deg, var(--blue-light), var(--navy));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:700;
+    font-size:26px;
+}
+.org-popover-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+/* Detail di kanan */
+.org-popover-details{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    text-align:left;
+}
+#orgPopoverName, #orgModalName{
+    font-size:17.5px;
+    font-weight:700;
+    color:var(--ink);
+    line-height:1.3;
+    margin-bottom:3px;
+}
+.org-role-label{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.8px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:12px;
+}
+.org-popover-meta{
+    font-size:12.5px;
+    color:rgba(23,21,51,0.7);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:14px;
+}
+.org-popover-meta .meta-row{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    padding-bottom:5px;
+    border-bottom:1px solid rgba(23,21,51,0.07);
+}
+.org-popover-meta .meta-row span:first-child{
+    color:rgba(23,21,51,0.4);
+    font-weight:600;
+}
+.org-popover-meta .meta-empty{
+    color:rgba(23,21,51,0.5);
+}
+.org-popover-links{
+    display:flex;
+    gap:8px;
+    margin-top:auto;
+}
+.org-popover-links a{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    background:#f5f7fb;
+    color:var(--blue);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    transition:background 0.2s ease, color 0.2s ease;
+}
+.org-popover-links a:hover{
+    background:var(--blue);
+    color:#fff;
+}
+
+/* ================= MODAL (TAP, MOBILE) ================= */
+.org-modal{
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+.org-modal.active{ opacity:1; visibility:visible; }
+.org-modal-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(11,10,46,0.55);
+}
+.org-modal-box{
+    position:relative;
+    max-width:380px;
+    width:100%;
+    background:#ffffff;
+    border-radius:24px;
+    padding:28px 22px 24px;
+    box-shadow:0 30px 60px rgba(11,10,46,0.35);
+    transform:translateY(14px);
+    transition:transform 0.3s ease;
+}
+.org-modal.active .org-modal-box{ transform:translateY(0); }
+.org-modal-row{
+    display:flex;
+    gap:16px;
+}
+.org-modal-close{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:32px;
+    height:32px;
+    border:none;
+    border-radius:50%;
+    background:#f5f7fb;
+    color:var(--ink);
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+}
+
+@media(prefers-reduced-motion: reduce){
+    .org-modal, .org-modal-box, .org-card, .org-popover{ transition:none; }
+}
+
+/* ================= MOBILE: ACCORDION PER KELOMPOK + FOTO ================= */
+.org-mobile{ display:none; }
+
+.org-m-groups{
+    max-width:520px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.org-m-group-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    background:#ffffff;
+    border:none;
+    border-radius:14px;
+    padding:14px 16px;
+    text-align:left;
+    font-family:'Montserrat', sans-serif;
+    font-size:14px;
+    font-weight:700;
+    color:var(--ink);
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(11,10,46,0.06);
+    -webkit-tap-highlight-color:transparent;
+}
+.org-m-group-header:active{
+    background:#eef0f9;
+}
+.org-m-chevron{
+    color:var(--blue);
+    transition:transform 0.3s ease;
+}
+.org-m-group-header.active .org-m-chevron{
+    transform:rotate(180deg);
+}
+
+/* Accordion foto: teknik grid-template-rows, murni dipicu class lewat
+   klik -- sama seperti dropdown "About" di navbar, sengaja tidak
+   bergantung ke :hover sama sekali biar tidak kena isu sticky-hover
+   di layar sentuh */
+.org-m-photos-wrap{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows 0.35s ease;
+}
+.org-m-photos-wrap.active{
+    grid-template-rows:1fr;
+    margin-top:10px;
+}
+.org-m-photos{
+    overflow:hidden;
+    min-height:0;
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    padding:2px 4px;
+}
+
+.org-m-photo{
+    width:170px;
+    height:170px;
+    border-radius:32px;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    box-shadow:0 10px 22px rgba(11,10,46,0.16);
+    flex-shrink:0;
+}
+.org-m-photo-inner{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    height:100%;
+    border-radius:32px;
+    overflow:hidden;
+    background:linear-gradient(160deg, var(--blue-light), var(--navy));
+    color:#fff;
+    font-weight:700;
+    font-size:38px;
+}
+.org-m-photo-inner img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.org-m-photo:active .org-m-photo-inner{
+    filter:brightness(0.92);
+}
+
+@media(max-width:900px){
+    .org-desktop{ display:none; }
+    .org-mobile{ display:block; }
+}

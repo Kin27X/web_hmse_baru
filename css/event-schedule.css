@@ -1,0 +1,381 @@
+/* =========================================================
+   EVENT SCHEDULE PAGE — mewarisi token warna & font dari
+   style.css. File ini berdiri sendiri (tidak bergantung ke
+   CSS halaman lain).
+   ========================================================= */
+
+.section-eyebrow{
+    display:inline-block;
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue);
+    margin-bottom:14px;
+}
+.section-eyebrow-light{
+    color:var(--blue-pale);
+}
+
+/* ================= PAGE BANNER ================= */
+.es-banner{
+    position:relative;
+    min-height:42vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:140px 6% 70px;
+    background: linear-gradient(135deg,#020b5c,#040f8f);
+    overflow:hidden;
+    isolation:isolate;
+}
+.es-banner-glow{
+    position:absolute;
+    inset:-20% -10% auto -10%;
+    height:70%;
+    background:radial-gradient(closest-side, rgba(91,63,245,0.35), transparent 70%);
+    z-index:-1;
+}
+.es-banner-content{
+    max-width:680px;
+    color:#fff;
+}
+.es-banner-content h1{
+    font-size:clamp(32px, 6vw, 52px);
+    font-weight:700;
+    line-height:1.2;
+    margin-bottom:16px;
+}
+.es-banner-content p{
+    font-size:16px;
+    line-height:1.7;
+    color:rgba(255,255,255,0.75);
+    max-width:520px;
+    margin:0 auto;
+}
+
+/* ================= SECTION WRAP ================= */
+.es-section{
+    padding:110px 6% 100px;
+    background:#f5f7fb;
+}
+
+/* ================= TIMELINE HORIZONTAL (DESKTOP) ================= */
+.eventline-track{
+    position:relative;
+    max-width:900px;
+    height:190px;
+    margin:0 auto 50px;
+}
+.eventline-line{
+    position:absolute;
+    left:22px;
+    right:22px;
+    top:50%;
+    border-top:3px dashed var(--blue-pale);
+}
+.eventline-nodes{
+    position:absolute;
+    inset:0;
+    display:flex;
+    justify-content:space-between;
+    padding:0 22px;
+}
+.eventline-node{
+    position:relative;
+    width:0; /* titik acuan di tengah, dot/label diposisikan absolut relatif ke ini */
+}
+.eventline-dot{
+    position:absolute;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--blue-pale);
+    z-index:2;
+}
+.eventline-label{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    font-size:12px;
+    font-weight:600;
+    color:rgba(23,21,51,0.55);
+}
+.eventline-stem{
+    position:absolute;
+    left:50%;
+    width:2px;
+    background:var(--blue-pale);
+    transform:translateX(-50%);
+}
+
+/* node tengah: dot kecil pas di garis, label di bawahnya */
+.eventline-node.node-mid .eventline-dot{
+    top:50%;
+}
+.eventline-node.node-mid .eventline-label{
+    top:calc(50% + 16px);
+}
+
+/* node ujung (pertama & terakhir): dot lebih besar, "melompat"
+   ke atas/bawah garis lewat tangkai (stem), label ikut menempel dot */
+.eventline-node.node-top .eventline-dot,
+.eventline-node.node-bottom .eventline-dot{
+    width:28px;
+    height:28px;
+    background:var(--blue);
+    box-shadow:0 0 0 6px rgba(45,31,214,0.14);
+}
+.eventline-node.node-top .eventline-dot{
+    top:0;
+}
+.eventline-node.node-top .eventline-label{
+    top:-26px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+}
+.eventline-node.node-top .eventline-stem{
+    top:14px;
+    height:calc(50% - 14px);
+}
+.eventline-node.node-bottom .eventline-dot{
+    top:100%;
+}
+.eventline-node.node-bottom .eventline-label{
+    top:calc(100% + 12px);
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+}
+.eventline-node.node-bottom .eventline-stem{
+    top:50%;
+    height:calc(50% - 14px);
+}
+
+/* ================= DAFTAR DETAIL (DESKTOP) ================= */
+.eventlist{
+    max-width:760px;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+.eventlist-item{
+    display:flex;
+    align-items:center;
+    gap:20px;
+    background:#ffffff;
+    border-radius:20px;
+    padding:16px 22px;
+    box-shadow:
+      0 10px 25px rgba(0,0,0,0.06),
+      0 0 15px rgba(45,31,214,0.06);
+    transition:transform 0.3s ease, box-shadow 0.3s ease;
+}
+.eventlist-item:hover{
+    transform:translateY(-4px);
+    box-shadow:
+      0 16px 32px rgba(0,0,0,0.10),
+      0 0 20px rgba(45,31,214,0.12);
+}
+.eventlist-photo{
+    width:68px;
+    height:68px;
+    border-radius:16px;
+    overflow:hidden;
+    flex-shrink:0;
+    background:linear-gradient(135deg, var(--blue-light), var(--navy));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(255,255,255,0.85);
+    font-size:22px;
+}
+.eventlist-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.eventlist-text{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+.eventlist-text h3{
+    font-size:17px;
+    font-weight:700;
+    color:var(--ink);
+}
+.eventlist-text span{
+    font-size:13.5px;
+    color:rgba(23,21,51,0.65);
+}
+
+/* ================= MOBILE: TIMELINE VERTIKAL + KARTU KLIK ================= */
+.es-mobile-wrap{
+    display:none;
+    max-width:520px;
+    margin:0 auto;
+}
+.eventline-m-item{
+    display:flex;
+    align-items:stretch;
+    gap:14px;
+}
+.eventline-m-rail{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:18px;
+    flex-shrink:0;
+}
+.eventline-m-rail .m-dot{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    background:var(--blue);
+    box-shadow:0 0 0 5px rgba(45,31,214,0.14);
+    flex-shrink:0;
+    margin-top:18px;
+}
+.eventline-m-rail .m-line{
+    flex:1;
+    width:2px;
+    border-left:2px dashed var(--blue-pale);
+    margin:4px 0 4px 1px;
+}
+.eventline-m-item:last-child .eventline-m-rail .m-line{
+    visibility:hidden;
+}
+.eventline-m-card{
+    flex:1;
+    margin-bottom:14px;
+    text-align:left;
+    background:#ffffff;
+    border:none;
+    border-radius:16px;
+    padding:14px 18px;
+    box-shadow:
+      0 10px 22px rgba(0,0,0,0.07),
+      0 0 12px rgba(45,31,214,0.06);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-family:'Montserrat', sans-serif;
+    -webkit-tap-highlight-color:transparent;
+}
+.eventline-m-card:active{
+    transform:scale(0.98);
+}
+.m-name{
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+}
+.m-date{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--blue);
+}
+
+/* ================= MODAL DETAIL EVENT ================= */
+.event-modal{
+    position:fixed;
+    inset:0;
+    z-index:2000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity 0.3s ease, visibility 0.3s ease;
+}
+.event-modal.active{
+    opacity:1;
+    visibility:visible;
+}
+.event-modal-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(11,10,46,0.55);
+}
+.event-modal-box{
+    position:relative;
+    max-width:380px;
+    width:100%;
+    background:#ffffff;
+    border-radius:24px;
+    padding:26px 26px 30px;
+    box-shadow:0 30px 60px rgba(11,10,46,0.35);
+    transform:translateY(14px);
+    transition:transform 0.3s ease;
+}
+.event-modal.active .event-modal-box{
+    transform:translateY(0);
+}
+.event-modal-close{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:32px;
+    height:32px;
+    border:none;
+    border-radius:50%;
+    background:#f5f7fb;
+    color:var(--ink);
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+}
+.event-modal-photo{
+    width:100%;
+    height:150px;
+    border-radius:16px;
+    margin-bottom:16px;
+    overflow:hidden;
+    background:linear-gradient(135deg, var(--blue-light), var(--navy));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:rgba(255,255,255,0.85);
+    font-size:34px;
+}
+.event-modal-photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+.event-modal-box h3{
+    font-size:20px;
+    font-weight:700;
+    color:var(--ink);
+    margin-bottom:10px;
+}
+.event-modal-box p{
+    font-size:14px;
+    line-height:1.7;
+    color:rgba(23,21,51,0.7);
+}
+
+@media(prefers-reduced-motion: reduce){
+    .event-modal, .event-modal-box, .eventlist-item, .eventline-m-card{
+        transition:none;
+    }
+}
+
+/* ================= RESPONSIVE SWITCH ================= */
+@media(max-width:900px){
+    .es-desktop-wrap{
+        display:none;
+    }
+    .es-mobile-wrap{
+        display:block;
+    }
+}
