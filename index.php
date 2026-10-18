@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HMSE - Himpunan Mahasiswa Software</title>
+    <title>HMSE - Himpunan Mahasiswa Software Engineering</title>
     <link rel="icon" type="image/png" href="images/logo2.png">
     <link rel="apple-touch-icon" href="images/logo2.png">
     <link rel="stylesheet" href="css/style.css?v=<?= filemtime(__DIR__ . '/css/style.css') ?>">
