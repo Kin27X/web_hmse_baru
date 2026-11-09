@@ -26,6 +26,7 @@ $currentNav = $currentNav ?? '';
             <a href="struktur-list.php" class="<?= $currentNav === 'struktur' ? 'current' : '' ?>">Struktur</a>
             <a href="gallery-list.php" class="<?= $currentNav === 'gallery' ? 'current' : '' ?>">Gallery</a>
             <a href="news-list.php" class="<?= $currentNav === 'news' ? 'current' : '' ?>">News</a>
+            <a href="voting.php" class="<?= $currentNav === 'voting' ? 'current' : '' ?>">Voting</a>
         </nav>
         <div class="admin-user">
             <span>Halo, <?= e($_SESSION['admin_username'] ?? '') ?></span>

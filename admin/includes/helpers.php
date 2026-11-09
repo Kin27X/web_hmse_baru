@@ -118,3 +118,37 @@ function makeSlug(string $text): string {
 function e(?string $value): string {
     return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Hapus file gambar hasil upload dari folder images/.
+ * Aman dipanggil sembarang: cuma file hasil handleImageUpload() (img_xxx.ext)
+ * yang bisa terhapus, jadi aset statis seperti logo2.png tidak akan kena.
+ * Kalau $pdo diisi, file TIDAK dihapus selama masih dipakai di tabel lain.
+ */
+function deleteUploadedImage(?string $filename, ?PDO $pdo = null): bool {
+    if (!$filename) return false;
+    $filename = basename($filename);
+    if (!preg_match('/^img_[0-9a-f]+\.[0-9]+\.(jpe?g|png|gif|webp)$/i', $filename)) return false;
+
+    if ($pdo) {
+        $refs = [
+            'SELECT COUNT(*) FROM vote_candidates WHERE photo = ?',
+            'SELECT COUNT(*) FROM gallery_photos WHERE photo = ?',
+            'SELECT COUNT(*) FROM events WHERE photo = ?',
+            'SELECT COUNT(*) FROM news_photos WHERE filename = ?',
+            'SELECT COUNT(*) FROM struktur_nodes WHERE photo = ?',
+        ];
+        foreach ($refs as $sql) {
+            try {
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$filename]);
+                if ((int)$stmt->fetchColumn() > 0) return false;
+            } catch (PDOException $e) {
+                // tabel/kolom belum ada di database ini: lewati
+            }
+        }
+    }
+
+    $path = UPLOAD_DIR . $filename;
+    return is_file($path) && @unlink($path);
+}

@@ -42,6 +42,14 @@ require __DIR__ . '/includes/header.php';
         <p style="font-size:12.5px; color:rgba(23,21,51,0.55); margin:0;">Kelola berita & dokumentasi foto.</p>
     </a>
 
+    <a class="admin-card" href="voting.php" style="text-decoration:none; color:inherit; display:block;">
+        <i class="material-icons" style="font-size:26px; color:#2d1fd6;">how_to_vote</i>
+        <h3 style="font-size:15px; margin:10px 0 4px;">Voting Mubes</h3>
+        <p style="font-size:12.5px; color:rgba(23,21,51,0.55); margin:0;">Kelola paslon, peserta & penghitungan suara.</p>
+    </a>
+
 </div>
 
-<?php require __DIR__ . '/includes/footer.php'; ?>
+</main>
+</body>
+</html>

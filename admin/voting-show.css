@@ -1,0 +1,542 @@
+/* =========================================================
+   LAYAR PROYEKTOR VOTING (voting-qr.php & voting-hitung.php)
+   Warna & font mengikuti web HMSE: navy gradient banner,
+   --blue #2d1fd6, --blue-light #5b3ff5, --blue-pale #8f7bff, Montserrat.
+   ========================================================= */
+:root{
+    --navy:#0b0a2e;
+    --ink:#171533;
+    --blue:#2d1fd6;
+    --blue-light:#5b3ff5;
+    --blue-pale:#8f7bff;
+    --paper:#fbfaf4;
+    --paper-back:#e9e5d6;
+    --gold:#ffd166;
+    --red:#e5484d;
+}
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+body.show{
+    min-height:100vh;
+    font-family:'Montserrat', sans-serif;
+    color:#fff;
+    background:
+        radial-gradient(900px 500px at 15% -10%, rgba(91,63,245,0.35), transparent 70%),
+        linear-gradient(135deg,#020b5c,#040f8f);
+    background-attachment:fixed;
+    display:flex;
+    flex-direction:column;
+    overflow-x:hidden;
+}
+
+/* ================= HEADER ================= */
+.show-head{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding:22px 4%;
+}
+.show-head img{ width:54px; height:54px; border-radius:50%; background:#fff; }
+.show-head > div:not(.show-progress){ flex:1; min-width:0; }
+.show-head h1{ font-size:clamp(20px, 2.6vw, 34px); font-weight:800; line-height:1.15; }
+.show-eyebrow{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue-pale);
+    margin-bottom:4px;
+}
+.show-progress{
+    display:flex;
+    align-items:baseline;
+    gap:4px;
+    padding:10px 20px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.08);
+}
+.show-progress b{ font-size:34px; font-weight:800; }
+.show-progress span{ font-size:20px; color:rgba(255,255,255,0.6); font-weight:700; }
+.show-progress small{ margin-left:8px; font-size:12px; color:rgba(255,255,255,0.6); }
+
+/* ================= TOMBOL ================= */
+.show-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 22px;
+    border:none;
+    border-radius:50px;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    font-family:inherit;
+    font-weight:700;
+    font-size:14.5px;
+    text-decoration:none;
+    cursor:pointer;
+    transition:background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+}
+.show-btn:hover{ background:rgba(255,255,255,0.18); }
+.show-btn:active{ transform:scale(0.97); }
+.show-btn:disabled{ opacity:0.4; cursor:default; }
+.show-btn-primary{ background:#fff; color:var(--blue); }
+.show-btn-primary:hover{ background:#eef0f9; }
+.show-btn.is-done{ background:rgba(62,224,138,0.18); color:#9ff0c4; cursor:default; }
+.show-icon-btn{
+    width:44px; height:44px;
+    border:none;
+    border-radius:50%;
+    background:rgba(255,255,255,0.1);
+    color:#fff;
+    cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+}
+.show-icon-btn:hover{ background:rgba(255,255,255,0.2); }
+
+.show-status{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 16px;
+    border-radius:50px;
+    background:rgba(255,255,255,0.1);
+    font-size:14px;
+    font-weight:700;
+}
+.show-status::before{ content:""; width:10px; height:10px; border-radius:50%; background:#c7c9d6; }
+.show-status-open::before{ background:#3ee08a; animation:pulse 1.8s infinite; }
+.show-status-closed::before{ background:#ff8a7a; }
+@keyframes pulse{
+    0%{ box-shadow:0 0 0 0 rgba(62,224,138,0.6); }
+    70%,100%{ box-shadow:0 0 0 10px rgba(62,224,138,0); }
+}
+
+.bump{ animation:bump 0.45s ease; }
+@keyframes bump{
+    40%{ transform:scale(1.25); color:var(--gold); }
+}
+
+/* ================= LAYAR QR ================= */
+.qr-stage{
+    flex:1;
+    display:grid;
+    grid-template-columns:auto minmax(280px, 460px);
+    justify-content:center;
+    align-items:center;
+    gap:7vw;
+    padding:20px 4% 50px;
+}
+.qr-card{
+    background:#fff;
+    color:var(--ink);
+    border-radius:30px;
+    padding:28px 28px 22px;
+    text-align:center;
+    box-shadow:0 30px 60px rgba(0,0,0,0.3);
+}
+.qr-box{ width:340px; height:340px; margin:0 auto; }
+.qr-box img, .qr-box canvas{ width:100% !important; height:100% !important; }
+.qr-hint{ margin-top:16px; font-size:22px; font-weight:800; color:var(--blue); }
+.qr-url{ margin-top:4px; font-size:14px; color:rgba(23,21,51,0.55); word-break:break-all; }
+.qr-live .show-status{ margin-bottom:18px; }
+.qr-count{ font-size:clamp(80px, 11vw, 150px); font-weight:800; line-height:1; }
+.qr-count span{ display:inline-block; }
+.qr-count small{ font-size:0.4em; color:rgba(255,255,255,0.55); }
+.qr-count-label{ font-size:20px; color:rgba(255,255,255,0.75); margin-top:6px; }
+.qr-progress{
+    height:14px;
+    margin-top:24px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.12);
+    overflow:hidden;
+}
+.qr-progress span{
+    display:block;
+    height:100%;
+    border-radius:14px;
+    background:linear-gradient(90deg, var(--blue-pale), #fff);
+    transition:width 0.8s ease;
+}
+.qr-schedule{
+    display:flex; align-items:center; gap:8px;
+    margin-top:22px;
+    font-size:15px;
+    color:rgba(255,255,255,0.65);
+}
+
+/* ================= PESAN (belum tutup / kosong) ================= */
+.show-message{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:40px 16px;
+    text-align:center;
+}
+.show-message > .material-icons{ font-size:64px; color:var(--blue-pale); }
+.show-message h2{ font-size:28px; }
+.show-message p{ color:rgba(255,255,255,0.7); margin-bottom:10px; }
+
+/* ================= PENGHITUNGAN ================= */
+.count-stage{
+    flex:1;
+    display:grid;
+    grid-template-columns:minmax(320px, 34%) 1fr;
+    gap:3vw;
+    padding:4px 4% 20px;
+    align-items:stretch;
+}
+
+/* ----- kotak & surat suara ----- */
+.ballot-zone{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+.ballot-slot{
+    order:1;
+    height:380px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.announce{
+    order:2;
+    min-height:76px;
+    text-align:center;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.25s ease, transform 0.25s ease;
+}
+.announce.show{ opacity:1; transform:none; }
+.announce small{
+    display:block;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--blue-pale);
+}
+.announce b{ font-size:clamp(26px, 2.6vw, 38px); font-weight:800; }
+.ballot-box{ order:3; position:relative; width:250px; }
+.ballot-box-lid{
+    height:20px;
+    margin:0 -10px;
+    border-radius:10px 10px 4px 4px;
+    background:#fff;
+    position:relative;
+}
+.ballot-box-lid::after{
+    content:"";
+    position:absolute;
+    left:50%; top:7px;
+    width:120px; height:6px;
+    border-radius:6px;
+    background:var(--navy);
+    transform:translateX(-50%);
+}
+.ballot-box-body{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px 10px 18px;
+    border-radius:0 0 18px 18px;
+    background:rgba(255,255,255,0.12);
+    border:2px solid rgba(255,255,255,0.25);
+    border-top:none;
+}
+.ballot-box-body .material-icons{ font-size:30px; color:var(--blue-pale); }
+.ballot-box-body b{ font-size:34px; font-weight:800; line-height:1.1; }
+.ballot-box-body small{ font-size:12px; color:rgba(255,255,255,0.65); }
+
+.ballot{
+    position:relative;
+    width:300px;
+    perspective:1400px;
+    opacity:0;
+    will-change:transform, opacity;
+}
+.ballot-sheet{
+    position:relative;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:6px;
+    padding:16px 16px 20px;
+    box-shadow:0 24px 50px rgba(0,0,0,0.35);
+    overflow:hidden;
+}
+.ballot-sheet::before{ /* garis lipatan */
+    content:"";
+    position:absolute;
+    left:0; right:0; top:50%;
+    border-top:1px dashed rgba(23,21,51,0.12);
+}
+.ballot-sheet-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding-bottom:10px;
+    margin-bottom:12px;
+    border-bottom:2px solid var(--ink);
+}
+.ballot-sheet-head img{ width:32px; height:32px; border-radius:50%; }
+.ballot-sheet-head b{ display:block; font-size:14px; letter-spacing:2px; }
+.ballot-sheet-head span{ display:block; font-size:10.5px; color:rgba(23,21,51,0.6); }
+.ballot-options{
+    display:grid;
+    grid-template-columns:repeat(var(--bcols, 2), minmax(0, 1fr));
+    gap:10px;
+}
+.ballot-opt{
+    border:1.5px solid rgba(23,21,51,0.35);
+    border-radius:4px;
+    padding:6px;
+    text-align:center;
+}
+.ballot-opt b{ display:block; font-size:13px; margin-top:5px; }
+.ballot-opt-photo{
+    position:relative;
+    aspect-ratio:4 / 3;
+    background:#e7e8f1;
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(23,21,51,0.35);
+    overflow:hidden;
+}
+.ballot-opt-photo img{ width:100%; height:100%; object-fit:cover; filter:grayscale(1) contrast(1.05); }
+.ballot-opt.is-coblos{ border-color:var(--blue); box-shadow:0 0 0 2px var(--blue); }
+.ballot-hole{
+    position:absolute;
+    left:50%; top:50%;
+    width:26px; height:26px;
+    margin:-13px 0 0 -13px;
+    border-radius:50%;
+    background:radial-gradient(circle, #0b0a2e 55%, #2b2950 70%, transparent 72%);
+    box-shadow:0 0 0 3px rgba(251,250,244,0.9), 0 0 0 5px rgba(23,21,51,0.35);
+    transform:scale(0);
+}
+.ballot-stamp{
+    position:absolute;
+    right:14px; bottom:12px;
+    padding:2px 12px;
+    border:3px solid var(--red);
+    border-radius:6px;
+    color:var(--red);
+    font-weight:800;
+    font-size:20px;
+    letter-spacing:3px;
+    opacity:0;
+    transform:rotate(-14deg);
+}
+.ballot-flap{
+    position:absolute;
+    left:0; right:0;
+    height:50%;
+    background:
+        repeating-linear-gradient(45deg, rgba(23,21,51,0.04) 0 6px, transparent 6px 12px),
+        var(--paper-back);
+    backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(23,21,51,0.35);
+    font-weight:800;
+    letter-spacing:4px;
+    font-size:15px;
+}
+.ballot-flap-top{
+    top:0;
+    border-radius:6px 6px 0 0;
+    transform-origin:bottom center;
+    border-bottom:1px solid rgba(23,21,51,0.15);
+}
+.ballot-flap-bottom{
+    bottom:0;
+    border-radius:0 0 6px 6px;
+    transform-origin:top center;
+}
+
+/* ----- papan turus ----- */
+.board{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:20px;
+    align-content:center;
+}
+.board-col{
+    display:flex;
+    flex-direction:column;
+    background:#fff;
+    color:var(--ink);
+    border-radius:24px;
+    padding:14px;
+    min-height:420px;
+    outline:4px solid transparent;
+    transition:transform 0.35s ease, outline-color 0.35s ease, box-shadow 0.35s ease;
+}
+.board-col.leading{
+    outline-color:var(--blue-pale);
+    transform:translateY(-6px);
+    box-shadow:0 24px 50px rgba(0,0,0,0.3);
+}
+.board-col.winner{
+    outline-color:var(--gold);
+    box-shadow:0 0 0 10px rgba(255,209,102,0.2), 0 30px 60px rgba(0,0,0,0.35);
+}
+.board-photo{
+    position:relative;
+    aspect-ratio:16 / 9;
+    border-radius:16px;
+    overflow:hidden;
+    background:linear-gradient(135deg,#020b5c,#040f8f);
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,0.4);
+}
+.board-col.is-kosong .board-photo{ background:#eef0f9; color:rgba(23,21,51,0.3); }
+.board-photo img{ width:100%; height:100%; object-fit:cover; }
+.board-photo .material-icons{ font-size:48px; }
+.board-no{
+    position:absolute;
+    left:10px; top:10px;
+    padding:4px 12px;
+    border-radius:12px;
+    background:#fff;
+    color:var(--blue);
+    font-size:22px;
+    font-weight:800;
+}
+.board-names{
+    margin:12px 4px 10px;
+    font-size:15px;
+    font-weight:700;
+    line-height:1.3;
+}
+.board-tally{
+    flex:1;
+    display:flex;
+    flex-wrap:wrap;
+    align-content:flex-start;
+    gap:4px 8px;
+    padding:10px 6px;
+    border-top:1px dashed rgba(23,21,51,0.15);
+    border-bottom:1px dashed rgba(23,21,51,0.15);
+    min-height:120px;
+}
+.tally-group{ width:54px; height:47px; overflow:visible; }
+.tally-group line{
+    stroke:var(--blue);
+    stroke-width:5;
+    stroke-linecap:round;
+    stroke-dasharray:1;
+    stroke-dashoffset:1;
+    transition:stroke-dashoffset 0.35s ease-out;
+}
+.tally-group line:nth-child(5){ stroke:var(--red); }
+.tally-group line.on{ stroke-dashoffset:0; }
+.tally-group line.instant{ transition:none; }
+.board-count{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:10px 6px 2px;
+}
+.board-num{ display:inline-block; font-size:56px; font-weight:800; line-height:1; color:var(--blue); }
+.board-pct{ font-size:18px; font-weight:700; color:rgba(23,21,51,0.5); }
+
+/* ----- kontrol ----- */
+.show-controls{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:14px 4% 24px;
+}
+.speed{
+    display:inline-flex;
+    padding:4px;
+    border-radius:50px;
+    background:rgba(255,255,255,0.1);
+}
+.speed button{
+    border:none;
+    background:none;
+    color:rgba(255,255,255,0.7);
+    font-family:inherit;
+    font-weight:700;
+    font-size:13.5px;
+    padding:8px 14px;
+    border-radius:50px;
+    cursor:pointer;
+}
+.speed button.active{ background:#fff; color:var(--blue); }
+.show-keys{ font-size:12px; color:rgba(255,255,255,0.45); }
+
+/* ----- hasil akhir ----- */
+.final{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    background:rgba(2,11,92,0.6);
+    backdrop-filter:blur(6px);
+    animation:fade-in 0.4s ease;
+}
+.final[hidden]{ display:none; }
+.final-box{
+    position:relative;
+    z-index:1;
+    max-width:640px;
+    text-align:center;
+    padding:40px 34px 32px;
+    border-radius:30px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.16), rgba(255,255,255,0.06));
+    border:1px solid rgba(255,255,255,0.25);
+    box-shadow:0 40px 80px rgba(0,0,0,0.4);
+    animation:pop-in 0.5s cubic-bezier(.2,.9,.3,1.2);
+}
+.final-box h2{ font-size:clamp(34px, 5vw, 60px); font-weight:800; line-height:1.1; margin:6px 0 12px; }
+.final-box p{ font-size:18px; color:rgba(255,255,255,0.8); line-height:1.5; }
+.final-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+    margin-top:28px;
+}
+@keyframes fade-in{ from{ opacity:0; } }
+@keyframes pop-in{ from{ opacity:0; transform:scale(0.85); } }
+
+.confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; }
+.confetti i{
+    position:absolute;
+    top:-20px;
+    width:10px; height:16px;
+    border-radius:2px;
+    animation:fall linear forwards;
+}
+@keyframes fall{
+    to{ transform:translate(var(--drift), 110vh) rotate(var(--spin)); }
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+    .qr-stage{ grid-template-columns:1fr; justify-items:center; text-align:center; }
+    .qr-schedule{ justify-content:center; }
+    .count-stage{ grid-template-columns:1fr; }
+    .ballot-slot{ height:340px; }
+    .board-col{ min-height:320px; }
+}
+@media(max-width:420px){
+    .qr-box{ width:260px; height:260px; }
+    .ballot{ width:260px; }
+    .show-keys{ display:none; }
+}
+@media(prefers-reduced-motion:reduce){
+    .confetti{ display:none; }
+}
