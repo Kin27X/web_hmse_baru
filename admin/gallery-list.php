@@ -39,6 +39,7 @@ require __DIR__ . '/includes/header.php';
                 <div class="actions" style="margin-top:10px;">
                     <a class="btn btn-secondary btn-small" href="gallery-form.php?id=<?= (int)$p['id'] ?>">Edit</a>
                     <form class="confirm-delete-form" method="POST" action="gallery-delete.php" onsubmit="return confirm('Hapus foto ini?');">
+                            <?= csrfField() ?>
                         <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
                         <button type="submit" class="btn btn-danger btn-small">Hapus</button>
                     </form>

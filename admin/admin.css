@@ -320,3 +320,8 @@ a{ color:inherit; }
 .vote-reveal .when-open{ display:none; }
 .vote-reveal[open] .when-open{ display:inline-flex; }
 .vote-reveal[open] .when-closed{ display:none; }
+
+/* Tabel peserta voting: judul kolom bisa diklik buat urutkan */
+#voterTable th.sortable{ cursor:pointer; user-select:none; white-space:nowrap; }
+#voterTable th.sortable:hover{ color:#2d1fd6; }
+#voterTable .sort-ind{ font-size:10px; margin-left:4px; }

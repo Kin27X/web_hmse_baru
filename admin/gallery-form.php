@@ -16,7 +16,9 @@ if ($id) {
     if ($found) $photo = $found;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrfCheck()) {
+    $error = 'Sesi kedaluwarsa, silakan ulangi.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $category = trim($_POST['category'] ?? '');
     $validCategories = ['olahraga', 'belajar', 'event'];
@@ -55,6 +57,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="admin-card">
     <form class="admin-form" method="POST" enctype="multipart/form-data">
+        <?= csrfField() ?>
 
         <label for="category">Kategori</label>
         <select id="category" name="category" required>

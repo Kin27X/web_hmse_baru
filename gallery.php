@@ -139,7 +139,7 @@ $galleryPhotos = array_map(fn($r) => [
 
 
     <script>
-        const galleryPhotos = <?= json_encode($galleryPhotos, JSON_UNESCAPED_UNICODE) ?>;
+        const galleryPhotos = <?= json_encode($galleryPhotos, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="js/index.js?v=<?= assetVersion('js/index.js') ?>"></script>
     <script src="js/gallery.js?v=<?= assetVersion('js/gallery.js') ?>"></script>

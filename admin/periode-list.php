@@ -45,6 +45,7 @@ require __DIR__ . '/includes/header.php';
                         <a class="btn btn-secondary btn-small" href="proker-list.php?periode_id=<?= (int)$p['id'] ?>">Kelola Isi</a>
                         <a class="btn btn-secondary btn-small" href="periode-form.php?id=<?= (int)$p['id'] ?>">Edit</a>
                         <form class="confirm-delete-form" method="POST" action="periode-delete.php" onsubmit="return confirm('Hapus periode <?= e($p['start_year']) ?>/<?= e($p['end_year']) ?>? Semua program kerja di dalamnya ikut terhapus.');">
+                            <?= csrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
                             <button type="submit" class="btn btn-danger btn-small">Hapus</button>
                         </form>

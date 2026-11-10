@@ -79,3 +79,31 @@ CREATE TABLE IF NOT EXISTS `vote_log` (
 -- Wakil opsional. Baris ini juga memperbarui tabel yang sudah terlanjur
 -- di-import dengan versi lama (aman dijalankan berulang kali).
 ALTER TABLE `vote_candidates` MODIFY `wakil_name` varchar(150) DEFAULT NULL;
+
+-- ---------------------------------------------------------------------
+-- Pengaman perangkat & pembatas percobaan (update keamanan).
+-- Aman dijalankan berulang kali. Kalau lupa di-import, web juga membuat
+-- kolom/tabel ini sendiri saat halaman voting pertama kali dibuka.
+-- ---------------------------------------------------------------------
+
+-- ID perangkat (cookie acak) yang dipakai di tiap aktivitas voting.
+ALTER TABLE `vote_log` ADD COLUMN IF NOT EXISTS `device_id` varchar(40) DEFAULT NULL;
+
+-- 1 = panitia mengizinkan NPM ini memilih dari perangkat yang sudah dipakai orang lain.
+ALTER TABLE `vote_voters` ADD COLUMN IF NOT EXISTS `device_ok` tinyint(1) NOT NULL DEFAULT 0;
+
+-- Perangkat mana yang sudah dipakai memilih untuk NPM mana (TANPA isi pilihan).
+CREATE TABLE IF NOT EXISTS `vote_devices` (
+  `device_id` varchar(40) NOT NULL,
+  `voter_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`device_id`, `voter_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Hitungan percobaan (login admin & cek NPM voting).
+CREATE TABLE IF NOT EXISTS `rate_limits` (
+  `k` varchar(120) NOT NULL,
+  `hits` int(11) NOT NULL DEFAULT 0,
+  `reset_at` int(11) NOT NULL,
+  PRIMARY KEY (`k`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

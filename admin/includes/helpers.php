@@ -152,3 +152,76 @@ function deleteUploadedImage(?string $filename, ?PDO $pdo = null): bool {
     $path = UPLOAD_DIR . $filename;
     return is_file($path) && @unlink($path);
 }
+
+/* ================= ANTI-CSRF =================
+ * Token acak per session. Taruh csrfField() di dalam tiap <form method="POST">,
+ * lalu cek csrfCheck() sebelum memproses POST-nya.
+ */
+function csrfToken(): string {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(16));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrfField(): string {
+    return '<input type="hidden" name="csrf" value="' . csrfToken() . '">';
+}
+
+function csrfCheck(): bool {
+    return isset($_POST['csrf'], $_SESSION['csrf_token'])
+        && hash_equals($_SESSION['csrf_token'], (string)$_POST['csrf']);
+}
+
+/* ================= PEMBATAS PERCOBAAN (rate limit) =================
+ * Dipakai buat login admin & cek NPM voting, supaya tidak bisa ditebak
+ * pakai script. Disimpan di tabel kecil `rate_limits` (dibuat otomatis).
+ * $key contoh: 'login_ip:1.2.3.4'. Waktu disimpan sebagai unix timestamp.
+ */
+function rateLimitTable(PDO $pdo): void {
+    static $done = false;
+    if ($done) return;
+    $pdo->exec('CREATE TABLE IF NOT EXISTS rate_limits (
+        k VARCHAR(120) NOT NULL PRIMARY KEY,
+        hits INT NOT NULL DEFAULT 0,
+        reset_at INT NOT NULL
+    )');
+    $done = true;
+}
+
+/** Sisa detik kunci kalau $key sudah mencapai $max percobaan; 0 kalau masih boleh. */
+function rateLimitWait(PDO $pdo, string $key, int $max): int {
+    rateLimitTable($pdo);
+    $stmt = $pdo->prepare('SELECT hits, reset_at FROM rate_limits WHERE k = ?');
+    $stmt->execute([$key]);
+    $row = $stmt->fetch();
+    if (!$row || (int)$row['reset_at'] <= time()) return 0;
+    return (int)$row['hits'] >= $max ? (int)$row['reset_at'] - time() : 0;
+}
+
+/** Catat satu percobaan untuk $key. Hitungan direset setelah $windowSec detik. */
+function rateLimitHit(PDO $pdo, string $key, int $windowSec): void {
+    rateLimitTable($pdo);
+    $now = time();
+    $upd = $pdo->prepare('UPDATE rate_limits SET hits = hits + 1 WHERE k = ? AND reset_at > ?');
+    $upd->execute([$key, $now]);
+    if ($upd->rowCount() > 0) return;
+    // Belum ada / sudah kedaluwarsa: mulai hitungan baru.
+    $pdo->prepare('DELETE FROM rate_limits WHERE k = ?')->execute([$key]);
+    try {
+        $pdo->prepare('INSERT INTO rate_limits (k, hits, reset_at) VALUES (?, 1, ?)')->execute([$key, $now + $windowSec]);
+    } catch (PDOException $e) {
+        // request lain barusan membuat baris yang sama: cukup tambah hitungannya
+        $pdo->prepare('UPDATE rate_limits SET hits = hits + 1 WHERE k = ?')->execute([$key]);
+    }
+}
+
+function rateLimitClear(PDO $pdo, string $key): void {
+    rateLimitTable($pdo);
+    $pdo->prepare('DELETE FROM rate_limits WHERE k = ?')->execute([$key]);
+}
+
+/** IP pengunjung. Sengaja TIDAK membaca X-Forwarded-For karena header itu bisa dipalsukan. */
+function clientIp(): string {
+    return (string)($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+}

@@ -155,7 +155,7 @@ $scheduleEvents = array_map(function($ev) use ($bulanIndo, $bulanSingkat) {
 
 
     <script>
-        const scheduleEvents = <?= json_encode($scheduleEvents, JSON_UNESCAPED_UNICODE) ?>;
+        const scheduleEvents = <?= json_encode($scheduleEvents, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="js/index.js?v=<?= assetVersion('js/index.js') ?>"></script>
     <script src="js/event-schedule.js?v=<?= assetVersion('js/event-schedule.js') ?>"></script>

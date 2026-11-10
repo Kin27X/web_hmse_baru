@@ -50,10 +50,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (($_POST['confirm_text'] ?? '') !== 'RESET') {
             $error = 'Ketik RESET (huruf besar) untuk mengonfirmasi.';
         } else {
+            votingEnsureSchema($pdo);
+            rateLimitTable($pdo);
             $pdo->beginTransaction();
             $pdo->exec('DELETE FROM vote_ballots');
             $pdo->exec('DELETE FROM vote_log');
-            $pdo->exec('UPDATE vote_voters SET has_voted = 0, voted_at = NULL');
+            $pdo->exec('DELETE FROM vote_devices');
+            $pdo->exec("DELETE FROM rate_limits WHERE k LIKE 'vote_%'");
+            $pdo->exec('UPDATE vote_voters SET has_voted = 0, voted_at = NULL, device_ok = 0');
             $pdo->exec('UPDATE vote_settings SET closed_manually = 0, link_wiped = 0, results_public = 0 WHERE id = 1');
             $pdo->commit();
             $msg = 'Semua suara & log dihapus. Peserta dan paslon tetap ada.';
@@ -77,10 +81,14 @@ $logs = $pdo->query('SELECT * FROM vote_log ORDER BY id DESC LIMIT 40')->fetchAl
 
 $toInput = fn(?string $dt) => $dt ? date('Y-m-d\TH:i', strtotime($dt)) : '';
 $eventLabels = [
-    'memilih'               => ['Memilih', ''],
-    'ditolak_sudah_memilih' => ['Ditolak: sudah memilih', 'badge-warn'],
-    'npm_tidak_terdaftar'   => ['NPM tidak terdaftar', 'badge-muted'],
-    'dibatalkan_admin'      => ['Suara dibatalkan admin', 'badge-warn'],
+    'memilih'                => ['Memilih', ''],
+    'ditolak_sudah_memilih'  => ['Ditolak: sudah memilih', 'badge-warn'],
+    'npm_tidak_terdaftar'    => ['NPM tidak terdaftar', 'badge-muted'],
+    'dibatalkan_admin'       => ['Suara dibatalkan admin', 'badge-warn'],
+    'ditolak_perangkat'      => ['Ditolak: perangkat sudah dipakai', 'badge-warn'],
+    'dibatasi'               => ['Dibatasi: terlalu banyak percobaan', 'badge-warn'],
+    'diizinkan_perangkat'    => ['Diizinkan pinjam HP', 'badge-muted'],
+    'izin_perangkat_dicabut' => ['Izin pinjam HP dicabut', 'badge-muted'],
 ];
 
 $pageTitle = 'Voting Mubes';
@@ -210,7 +218,7 @@ require __DIR__ . '/includes/header.php';
     <?php else: ?>
         <div style="overflow-x:auto;">
         <table class="admin-table" style="box-shadow:none;">
-            <thead><tr><th>Waktu</th><th>NPM</th><th>Kejadian</th><th>IP</th><th>Perangkat</th></tr></thead>
+            <thead><tr><th>Waktu</th><th>NPM</th><th>Kejadian</th><th>IP</th><th>ID HP</th><th>Perangkat</th></tr></thead>
             <tbody>
             <?php foreach ($logs as $l):
                 [$label, $cls] = $eventLabels[$l['event']] ?? [$l['event'], 'badge-muted']; ?>
@@ -219,7 +227,8 @@ require __DIR__ . '/includes/header.php';
                     <td><?= e($l['npm']) ?></td>
                     <td><span class="badge <?= $cls ?>"><?= e($label) ?></span></td>
                     <td><?= e($l['ip']) ?></td>
-                    <td class="vote-ua" title="<?= e($l['user_agent']) ?>"><?= e($l['user_agent']) ?></td>
+                    <td><code><?= e(!empty($l['device_id']) ? substr($l['device_id'], 0, 6) : '-') ?></code></td>
+                    <td class="vote-ua" title="<?= e($l['user_agent']) ?>"><?= e(votingShortUa($l['user_agent'])) ?></td>
                 </tr>
             <?php endforeach; ?>
             </tbody>

@@ -25,7 +25,9 @@ if (!$periodeId) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrfCheck()) {
+    $error = 'Sesi kedaluwarsa, silakan ulangi.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
@@ -57,6 +59,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="admin-card">
     <form class="admin-form" method="POST">
+        <?= csrfField() ?>
         <label for="title">Judul</label>
         <input type="text" id="title" name="title" value="<?= e($program['title']) ?>" required>
 

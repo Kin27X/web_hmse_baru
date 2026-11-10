@@ -1,0 +1,6 @@
+# Folder ini cuma buat gambar. Kalau suatu saat ada file script yang lolos
+# ke sini, Apache tidak akan menjalankannya.
+<FilesMatch "\.(php\d?|phtml|phar|pht|cgi|pl|py|sh)$">
+    Require all denied
+</FilesMatch>
+Options -ExecCGI -Indexes

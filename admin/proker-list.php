@@ -61,7 +61,8 @@ require __DIR__ . '/includes/header.php';
                     ?></td>
                     <td class="actions">
                         <a class="btn btn-secondary btn-small" href="proker-form.php?id=<?= (int)$p['id'] ?>">Edit</a>
-                        <form class="confirm-delete-form" method="POST" action="proker-delete.php" onsubmit="return confirm('Hapus program \'<?= e($p['title']) ?>\'?');">
+                        <form class="confirm-delete-form" method="POST" action="proker-delete.php" onsubmit="return confirm(<?= e(json_encode("Hapus program '" . $p['title'] . "'?")) ?>);">
+                            <?= csrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
                             <input type="hidden" name="periode_id" value="<?= $periodeId ?>">
                             <button type="submit" class="btn btn-danger btn-small">Hapus</button>

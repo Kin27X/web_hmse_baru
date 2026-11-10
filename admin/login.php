@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/includes/auth.php';
 require __DIR__ . '/../config.php';
+require __DIR__ . '/includes/helpers.php';
 
 if (isLoggedIn()) {
     header('Location: dashboard.php');
@@ -9,26 +10,44 @@ if (isLoggedIn()) {
 
 $error = '';
 
+// Batas salah password: 5x per IP, 10x per username, dalam 15 menit.
+const LOGIN_RL_WINDOW = 900;
+const LOGIN_RL_IP     = 5;
+const LOGIN_RL_USER   = 10;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $username = is_string($_POST['username'] ?? null) ? trim($_POST['username']) : '';
+    $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
 
     if ($username === '' || $password === '') {
         $error = 'Username dan password wajib diisi.';
     } else {
         $pdo = getDbConnection();
-        $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE username = ?');
-        $stmt->execute([$username]);
-        $user = $stmt->fetch();
+        $ipKey = 'login_ip:' . clientIp();
+        $userKey = 'login_user:' . strtolower(substr($username, 0, 60));
+        $wait = max(rateLimitWait($pdo, $ipKey, LOGIN_RL_IP), rateLimitWait($pdo, $userKey, LOGIN_RL_USER));
 
-        if ($user && password_verify($password, $user['password_hash'])) {
-            $_SESSION['admin_id'] = $user['id'];
-            $_SESSION['admin_username'] = $user['username'];
-            header('Location: dashboard.php');
-            exit;
+        if ($wait > 0) {
+            $error = 'Terlalu banyak percobaan login. Coba lagi dalam ' . max(1, (int)ceil($wait / 60)) . ' menit.';
         } else {
-            $error = 'Username atau password salah.';
+            $stmt = $pdo->prepare('SELECT * FROM admin_users WHERE username = ?');
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password_hash'])) {
+                rateLimitClear($pdo, $ipKey);
+                rateLimitClear($pdo, $userKey);
+                session_regenerate_id(true); // cegah session fixation
+                $_SESSION['admin_id'] = $user['id'];
+                $_SESSION['admin_username'] = $user['username'];
+                header('Location: dashboard.php');
+                exit;
+            } else {
+                rateLimitHit($pdo, $ipKey, LOGIN_RL_WINDOW);
+                rateLimitHit($pdo, $userKey, LOGIN_RL_WINDOW);
+                $error = 'Username atau password salah.';
+            }
         }
     }
 }

@@ -5,6 +5,7 @@ require __DIR__ . '/admin/includes/helpers.php';
 require __DIR__ . '/admin/includes/voting-helpers.php';
 
 $pdo = getDbConnection();
+$deviceId = votingDeviceId(); // cookie ID perangkat (dibuat sebelum ada output)
 $state = votingState($pdo);
 $settings = $state['settings'];
 $status = $state['status'];
@@ -12,7 +13,15 @@ $candidates = votingCandidates($pdo);
 $options = votingOptions($candidates);
 
 $error = '';
-$alreadyVoted = null; // baris peserta kalau NPM yang dimasukkan ternyata sudah memilih
+// Kalau NPM ditolak: ['type' => 'tidak_terdaftar'|'sudah'|'perangkat', 'npm' => ...].
+// Nama & jam memilih sengaja TIDAK ditampilkan, supaya daftar nama anggota
+// tidak bisa disedot dari sini.
+$blocked = null;
+
+// Batas percobaan cek NPM: per perangkat & per IP (IP longgar karena WiFi kampus dipakai bareng).
+const VOTE_RL_WINDOW = 600;   // 10 menit
+const VOTE_RL_DEVICE = 8;
+const VOTE_RL_IP     = 40;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -26,21 +35,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($status !== 'open') {
         $error = 'Voting sedang tidak dibuka.';
     } elseif ($action === 'cek_npm') {
-        $npm = normalizeNpm($_POST['npm'] ?? '');
-        if ($npm === '') {
+        $npm = is_string($_POST['npm'] ?? null) ? substr(normalizeNpm($_POST['npm']), 0, 30) : '';
+        $wait = max(
+            rateLimitWait($pdo, 'vote_dev:' . $deviceId, VOTE_RL_DEVICE),
+            rateLimitWait($pdo, 'vote_ip:' . clientIp(), VOTE_RL_IP)
+        );
+
+        if ($wait > 0) {
+            votingLog($pdo, null, $npm ?: null, 'dibatasi');
+            $error = 'Terlalu banyak percobaan. Coba lagi dalam ' . max(1, (int)ceil($wait / 60)) . ' menit.';
+        } elseif ($npm === '') {
             $error = 'NPM wajib diisi.';
         } else {
+            rateLimitHit($pdo, 'vote_dev:' . $deviceId, VOTE_RL_WINDOW);
+            rateLimitHit($pdo, 'vote_ip:' . clientIp(), VOTE_RL_WINDOW);
+
             $stmt = $pdo->prepare('SELECT * FROM vote_voters WHERE npm = ?');
             $stmt->execute([$npm]);
             $voter = $stmt->fetch();
 
             if (!$voter) {
                 votingLog($pdo, null, $npm, 'npm_tidak_terdaftar');
-                $error = 'NPM ' . $npm . ' tidak terdaftar sebagai anggota HMSE.';
+                $blocked = ['type' => 'tidak_terdaftar', 'npm' => $npm];
             } elseif ((int)$voter['has_voted'] === 1) {
                 votingLog($pdo, (int)$voter['id'], $npm, 'ditolak_sudah_memilih');
-                $alreadyVoted = $voter;
+                $blocked = ['type' => 'sudah', 'npm' => $npm];
+            } elseif (votingDeviceBlocked($pdo, $deviceId, $voter)) {
+                votingLog($pdo, (int)$voter['id'], $npm, 'ditolak_perangkat');
+                $blocked = ['type' => 'perangkat', 'npm' => $npm];
             } else {
+                session_regenerate_id(true);
                 $_SESSION['vote_voter_id'] = (int)$voter['id'];
                 header('Location: voting.php');
                 exit;
@@ -55,18 +79,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (!in_array($choice, array_column($options, 'key'), true)) {
             $error = 'Pilih salah satu dulu sebelum mengirim suara.';
         } else {
-            $result = castBallot($pdo, $voterId, $choice);
+            $result = castBallot($pdo, $voterId, $choice, $deviceId);
             if ($result === null) {
                 unset($_SESSION['vote_voter_id']);
                 $_SESSION['vote_done'] = true;
                 header('Location: voting.php');
                 exit;
             }
-            if ($result === 'sudah') {
+            if ($result === 'sudah' || $result === 'perangkat') {
                 unset($_SESSION['vote_voter_id']);
-                $stmt = $pdo->prepare('SELECT * FROM vote_voters WHERE id = ?');
+                $stmt = $pdo->prepare('SELECT npm FROM vote_voters WHERE id = ?');
                 $stmt->execute([$voterId]);
-                $alreadyVoted = $stmt->fetch() ?: null;
+                $blocked = ['type' => $result, 'npm' => (string)$stmt->fetchColumn()];
             } else {
                 $error = $result;
             }
@@ -76,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Peserta yang sudah lolos cek NPM dan sedang di layar surat suara
 $sessionVoter = null;
-if (!$alreadyVoted && !empty($_SESSION['vote_voter_id'])) {
+if (!$blocked && !empty($_SESSION['vote_voter_id'])) {
     $stmt = $pdo->prepare('SELECT * FROM vote_voters WHERE id = ?');
     $stmt->execute([(int)$_SESSION['vote_voter_id']]);
     $sessionVoter = $stmt->fetch() ?: null;
@@ -89,13 +113,16 @@ if (!$alreadyVoted && !empty($_SESSION['vote_voter_id'])) {
 $justVoted = !empty($_SESSION['vote_done']);
 unset($_SESSION['vote_done']);
 
-// Link WA ke panitia untuk kasus "NPM saya sudah dipakai orang lain"
+// Link WA ke panitia kalau NPM ditolak (mungkin dipakai orang lain / pinjam HP teman)
 $waLink = null;
-if ($alreadyVoted) {
+if ($blocked) {
     $base = buildWhatsappLink($settings['panitia_wa']);
     if ($base) {
-        $text = 'Halo panitia, NPM ' . $alreadyVoted['npm'] . ' (' . $alreadyVoted['name'] . ') tercatat sudah memilih pada '
-              . formatWaktu($alreadyVoted['voted_at']) . ', padahal saya belum memilih.';
+        $text = [
+            'perangkat'       => 'Halo panitia, saya NPM ' . $blocked['npm'] . '. Saya mau memilih tapi ditolak karena perangkat ini sudah dipakai memilih (saya meminjam HP orang lain). Mohon diizinkan.',
+            'sudah'           => 'Halo panitia, saya NPM ' . $blocked['npm'] . '. Di web voting NPM saya tercatat sudah memilih, padahal saya belum memilih. Mohon dicek.',
+            'tidak_terdaftar' => 'Halo panitia, saya NPM ' . $blocked['npm'] . '. NPM saya tidak terdaftar di web voting, padahal saya anggota HMSE. Mohon dicek.',
+        ][$blocked['type']];
         $waLink = $base . '?text=' . rawurlencode($text);
     }
 }
@@ -222,16 +249,40 @@ if ($showResults) {
                 <?php endif; ?>
             </div>
 
-        <?php elseif ($alreadyVoted): ?>
-            <!-- ===== NPM sudah dipakai ===== -->
+        <?php elseif ($blocked && $blocked['type'] === 'perangkat'): ?>
+            <!-- ===== Perangkat sudah dipakai NPM lain ===== -->
+            <div class="vt-card vt-center">
+                <div class="vt-icon vt-icon-warn"><span class="material-icons">phonelink_lock</span></div>
+                <h2>Perangkat ini sudah dipakai memilih</h2>
+                <p>Satu perangkat hanya bisa dipakai untuk satu pemilih. Silakan memilih dari HP kamu sendiri.</p>
+                <div class="vt-actions">
+                    <?php if ($waLink): ?>
+                        <a class="vt-btn vt-btn-wa" href="<?= e($waLink) ?>" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
+                    <?php endif; ?>
+                    <a class="vt-btn vt-btn-ghost" href="voting.php">Kembali</a>
+                </div>
+            </div>
+
+        <?php elseif ($blocked && $blocked['type'] === 'tidak_terdaftar'): ?>
+            <!-- ===== NPM tidak terdaftar ===== -->
+            <div class="vt-card vt-center">
+                <div class="vt-icon vt-icon-warn"><span class="material-icons">person_off</span></div>
+                <h2>NPM tidak terdaftar</h2>
+                <p>NPM <strong><?= e($blocked['npm']) ?></strong> tidak ada di daftar peserta voting.</p>
+                <div class="vt-actions">
+                    <?php if ($waLink): ?>
+                        <a class="vt-btn vt-btn-wa" href="<?= e($waLink) ?>" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
+                    <?php endif; ?>
+                    <a class="vt-btn vt-btn-ghost" href="voting.php">Coba lagi</a>
+                </div>
+            </div>
+
+        <?php elseif ($blocked && $blocked['type'] === 'sudah'): ?>
+            <!-- ===== NPM sudah memilih (nama & jam sengaja tidak ditampilkan) ===== -->
             <div class="vt-card vt-center">
                 <div class="vt-icon vt-icon-warn"><span class="material-icons">block</span></div>
                 <h2>NPM ini sudah menggunakan hak suara</h2>
-                <p>
-                    NPM <strong><?= e($alreadyVoted['npm']) ?></strong> (<?= e($alreadyVoted['name']) ?>)
-                    tercatat sudah memilih pada <strong><?= e(formatWaktu($alreadyVoted['voted_at'])) ?></strong>.
-                </p>
-                <p class="vt-muted">Merasa belum memilih? Laporkan ke panitia supaya bisa diperiksa.</p>
+                <p>NPM <strong><?= e($blocked['npm']) ?></strong> tercatat sudah memilih.</p>
                 <div class="vt-actions">
                     <?php if ($waLink): ?>
                         <a class="vt-btn vt-btn-wa" href="<?= e($waLink) ?>" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> Hubungi Panitia</a>
@@ -245,7 +296,7 @@ if ($showResults) {
             <div class="vt-voter-bar">
                 <div>
                     <span class="vt-muted vt-small">Memilih sebagai</span>
-                    <strong><?= e($sessionVoter['name']) ?></strong> <span class="vt-muted">&middot; <?= e($sessionVoter['npm']) ?></span>
+                    <strong><?= e(votingMaskName($sessionVoter['name'])) ?></strong> <span class="vt-muted">&middot; <?= e($sessionVoter['npm']) ?></span>
                 </div>
                 <form method="POST">
                     <?= csrfField() ?>
@@ -334,7 +385,7 @@ if ($showResults) {
                 <form method="POST" class="vt-npm-form">
                     <?= csrfField() ?>
                     <input type="hidden" name="action" value="cek_npm">
-                    <input type="text" name="npm" inputmode="numeric" autocomplete="off" placeholder="Contoh: 2411010001" value="<?= e($_POST['npm'] ?? '') ?>" required autofocus>
+                    <input type="text" name="npm" inputmode="numeric" autocomplete="off" placeholder="Contoh: 2411010001" value="<?= e(is_string($_POST['npm'] ?? null) ? $_POST['npm'] : '') ?>" required autofocus>
                     <button type="submit" class="vt-btn vt-btn-primary">Lanjut</button>
                 </form>
             </div>

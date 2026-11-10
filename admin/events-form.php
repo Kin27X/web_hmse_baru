@@ -29,7 +29,9 @@ if (!$id) {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrfCheck()) {
+    $error = 'Sesi kedaluwarsa, silakan ulangi.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $title = trim($_POST['title'] ?? '');
     $place = trim($_POST['place'] ?? '');
@@ -66,6 +68,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="admin-card">
     <form class="admin-form" method="POST" enctype="multipart/form-data">
+        <?= csrfField() ?>
         <label for="title">Judul Event</label>
         <input type="text" id="title" name="title" value="<?= e($event['title']) ?>" required>
 

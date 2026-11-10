@@ -36,7 +36,9 @@ $isKaprodi = ($node['node_key'] ?? '') === 'kaprodi';
 // Dropdown pilihan kelompok induk (cuma relevan utk mode "member")
 $parentOptions = $pdo->query("SELECT * FROM struktur_nodes WHERE parent_id IS NULL AND group_type IN ('branch','division') ORDER BY group_type, sort_order")->fetchAll();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrfCheck()) {
+    $error = 'Sesi kedaluwarsa, silakan ulangi.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $name = trim($_POST['name'] ?? '');
     $label = trim($_POST['label'] ?? '');
@@ -90,6 +92,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="admin-card">
     <form class="admin-form" method="POST" enctype="multipart/form-data">
+        <?= csrfField() ?>
 
         <?php if ($mode === 'member'): ?>
             <label for="parent_id">Kelompok (Cabang/Divisi)</label>

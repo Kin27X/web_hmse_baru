@@ -67,7 +67,8 @@ require __DIR__ . '/includes/header.php';
                     </td>
                     <td class="actions">
                         <a class="btn btn-secondary btn-small" href="events-form.php?id=<?= (int)$ev['id'] ?>">Edit</a>
-                        <form class="confirm-delete-form" method="POST" action="events-delete.php" onsubmit="return confirm('Hapus event \'<?= e($ev['title']) ?>\'?');">
+                        <form class="confirm-delete-form" method="POST" action="events-delete.php" onsubmit="return confirm(<?= e(json_encode("Hapus event '" . $ev['title'] . "'?")) ?>);">
+                            <?= csrfField() ?>
                             <input type="hidden" name="id" value="<?= (int)$ev['id'] ?>">
                             <button type="submit" class="btn btn-danger btn-small">Hapus</button>
                         </form>

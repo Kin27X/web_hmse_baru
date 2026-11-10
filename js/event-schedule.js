@@ -2,6 +2,13 @@
 // Variabel `scheduleEvents` disiapkan oleh event-schedule.php (dari database)
 // lewat <script> inline sebelum file ini di-load -- lihat definisinya di sana.
 
+// Teks dari database di-escape dulu sebelum masuk innerHTML (anti-XSS).
+function esEscape(value){
+  return String(value ?? "").replace(/[&<>"']/g, ch => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[ch]);
+}
+
 // ================= RENDER: TIMELINE HORIZONTAL (DESKTOP) =================
 const eventlineNodes = document.getElementById("eventlineNodes");
 const eventlist = document.getElementById("eventlist");
@@ -19,7 +26,7 @@ if(eventlineNodes && eventlist){
     const labelText = posClass === "node-mid" ? ev.dateShort : ev.dateFull;
 
     node.innerHTML = `
-      <span class="eventline-label">${labelText}</span>
+      <span class="eventline-label">${esEscape(labelText)}</span>
       <span class="eventline-dot"></span>
       ${stemHtml}
     `;
@@ -30,11 +37,11 @@ if(eventlineNodes && eventlist){
     item.className = "eventlist-item";
     item.innerHTML = `
       <div class="eventlist-photo">
-        ${ev.photo ? `<img src="${ev.photo}" alt="${ev.name}">` : `<i class="material-icons">event</i>`}
+        ${ev.photo ? `<img src="${esEscape(ev.photo)}" alt="${esEscape(ev.name)}">` : `<i class="material-icons">event</i>`}
       </div>
       <div class="eventlist-text">
-        <h3>${ev.name}</h3>
-        <span>${ev.place} &middot; ${ev.time}</span>
+        <h3>${esEscape(ev.name)}</h3>
+        <span>${esEscape(ev.place)} &middot; ${esEscape(ev.time)}</span>
       </div>
     `;
     eventlist.appendChild(item);
@@ -58,8 +65,8 @@ if(esMobileWrap){
         <span class="m-line"></span>
       </div>
       <button class="eventline-m-card" type="button" data-index="${i}">
-        <span class="m-name">${ev.name}</span>
-        <span class="m-date">${ev.dateFull}</span>
+        <span class="m-name">${esEscape(ev.name)}</span>
+        <span class="m-date">${esEscape(ev.dateFull)}</span>
       </button>
     `;
     esMobileWrap.appendChild(item);
@@ -80,7 +87,7 @@ const eventModalMeta = document.getElementById("eventModalMeta");
 function openEventModal(ev){
 
   eventModalPhoto.innerHTML = ev.photo
-    ? `<img src="${ev.photo}" alt="${ev.name}">`
+    ? `<img src="${esEscape(ev.photo)}" alt="${esEscape(ev.name)}">`
     : `<i class="material-icons">event</i>`;
 
   eventModalDate.textContent = ev.dateFull;

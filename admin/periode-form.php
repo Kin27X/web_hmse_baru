@@ -16,7 +16,9 @@ if ($id) {
     if ($found) $periode = $found;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrfCheck()) {
+    $error = 'Sesi kedaluwarsa, silakan ulangi.';
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $startYear = trim($_POST['start_year'] ?? '');
     $endYear = trim($_POST['end_year'] ?? '');
@@ -48,6 +50,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="admin-card">
     <form class="admin-form" method="POST">
+        <?= csrfField() ?>
         <div class="field-row">
             <div>
                 <label for="start_year">Tahun Mulai</label>

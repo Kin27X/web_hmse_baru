@@ -32,7 +32,8 @@ function renderGroupCard($group, $childrenByParent, $showDeleteHead = true) {
     echo '<div class="actions" style="display:flex; gap:8px;">';
     echo '<a class="btn btn-secondary btn-small" href="struktur-form.php?id=' . (int)$group['id'] . '">Edit</a>';
     if ($showDeleteHead) {
-        echo '<form class="confirm-delete-form" method="POST" action="struktur-delete.php" onsubmit="return confirm(\'Hapus grup \\\'' . e($group['name']) . '\\\' beserta seluruh anggotanya?\');">';
+        echo '<form class="confirm-delete-form" method="POST" action="struktur-delete.php" onsubmit="return confirm(' . e(json_encode("Hapus grup '" . $group['name'] . "' beserta seluruh anggotanya?")) . ');">';
+        echo csrfField();
         echo '<input type="hidden" name="id" value="' . (int)$group['id'] . '">';
         echo '<button type="submit" class="btn btn-danger btn-small">Hapus Grup</button>';
         echo '</form>';
@@ -44,7 +45,8 @@ function renderGroupCard($group, $childrenByParent, $showDeleteHead = true) {
         foreach ($members as $m) {
             echo '<tr><td>' . e($m['name']) . '</td><td>' . e($m['label']) . '</td><td class="actions">';
             echo '<a class="btn btn-secondary btn-small" href="struktur-form.php?id=' . (int)$m['id'] . '">Edit</a>';
-            echo '<form class="confirm-delete-form" method="POST" action="struktur-delete.php" onsubmit="return confirm(\'Hapus ' . e($m['name']) . '?\');">';
+            echo '<form class="confirm-delete-form" method="POST" action="struktur-delete.php" onsubmit="return confirm(' . e(json_encode('Hapus ' . $m['name'] . '?')) . ');">';
+            echo csrfField();
             echo '<input type="hidden" name="id" value="' . (int)$m['id'] . '">';
             echo '<button type="submit" class="btn btn-danger btn-small">Hapus</button>';
             echo '</form></td></tr>';
